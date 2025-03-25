@@ -1,11 +1,11 @@
 #ifndef SNAKE_H
 #define SNAKE_H
 
+#include <SDL2/SDL.h>
 #include <vector>
-#include "SDL.h"
 
 class Snake {
- public:
+public:
   enum class Direction { kUp, kDown, kLeft, kRight };
 
   Snake(int grid_width, int grid_height)
@@ -28,7 +28,7 @@ class Snake {
   float head_y;
   std::vector<SDL_Point> body;
 
- private:
+private:
   void UpdateHead();
   void UpdateBody(SDL_Point &current_cell, SDL_Point &prev_cell);
 
