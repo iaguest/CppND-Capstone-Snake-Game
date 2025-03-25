@@ -2,11 +2,11 @@
 #define GAME_H
 
 #include "controller.h"
+#include "gamestate.h"
 #include "renderer.h"
 #include "snake.h"
 #include <SDL2/SDL.h>
 #include <random>
-
 
 class Game {
 public:
@@ -17,6 +17,7 @@ public:
   int GetSize() const;
 
 private:
+  GameState state;
   Snake snake;
   SDL_Point food;
 
