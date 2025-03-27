@@ -3,10 +3,8 @@
 #include <iostream>
 
 RenderText::RenderText(std::string text, SDL_Renderer *sdl_renderer,
-                       TTF_Font *font)
-    : text(text), sdl_renderer(sdl_renderer), font(font) {
-  SDL_Color textColor = {255, 255, 255, 255};
-
+                       TTF_Font *font, SDL_Color textColor, int xPos, int yPos)
+    : text(text), sdl_renderer(sdl_renderer), font(font), textColor(textColor) {
   SDL_Surface *textSurface =
       TTF_RenderText_Blended(font, text.c_str(), textColor);
   if (!textSurface) {
@@ -27,7 +25,7 @@ RenderText::RenderText(std::string text, SDL_Renderer *sdl_renderer,
 
   SDL_FreeSurface(textSurface);
 
-  textRect = {0, 0, textWidth, textHeight};
+  textRect = {xPos, yPos, textWidth, textHeight};
 }
 
 RenderText::~RenderText() {

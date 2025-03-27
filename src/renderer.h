@@ -24,15 +24,14 @@ private:
   void RenderStartScreen();
   void RenderRunningScreen(const SDL_Point &food, const Snake &snake);
 
-  SDL_Window *sdl_window{nullptr};
-  SDL_Renderer *sdl_renderer{nullptr};
-  TTF_Font *font{nullptr};
-
   const std::size_t screen_width;
   const std::size_t screen_height;
   const std::size_t grid_width;
   const std::size_t grid_height;
 
+  SDL_Window *sdl_window{nullptr};
+  SDL_Renderer *sdl_renderer{nullptr};
+  TTF_Font *font{nullptr};
   std::unique_ptr<RenderText> prompt{nullptr};
 };
 

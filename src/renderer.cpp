@@ -55,8 +55,8 @@ Renderer::Renderer(const std::size_t screen_width,
     throw std::runtime_error("Failed to open font");
   }
 
-  prompt =
-      std::make_unique<RenderText>("Enter your name: ", sdl_renderer, font);
+  prompt = std::make_unique<RenderText>("Enter your name: ", sdl_renderer, font,
+                                        SDL_Color{255, 255, 255, 255}, 10, 10);
 }
 
 Renderer::~Renderer() {
