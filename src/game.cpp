@@ -65,7 +65,8 @@ void Game::PlaceFood() {
 
 void Game::Update() {
   if (!snake.alive) {
-    state = GameState::GAME_OVER;
+    // TODO: Set this to game over and pause before exiting
+    state = GameState::EXITING;
     return;
   } else if (state == GameState::RUNNING) {
     snake.Update();
