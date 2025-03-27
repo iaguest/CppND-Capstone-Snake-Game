@@ -4,7 +4,14 @@
 
 RenderText::RenderText(std::string text, SDL_Renderer *sdl_renderer,
                        TTF_Font *font, SDL_Color textColor, int xPos, int yPos)
-    : text(text), sdl_renderer(sdl_renderer), font(font), textColor(textColor) {
+    : text(text), sdl_renderer(sdl_renderer), font(font), textColor(textColor),
+      xPos(xPos), yPos(yPos) {
+  CreateTexture(font, text, textColor, sdl_renderer, xPos, yPos);
+}
+
+void RenderText::CreateTexture(TTF_Font *font, std::string &text,
+                               const SDL_Color &textColor,
+                               SDL_Renderer *sdl_renderer, int xPos, int yPos) {
   SDL_Surface *textSurface =
       TTF_RenderText_Blended(font, text.c_str(), textColor);
   if (!textSurface) {
@@ -31,7 +38,17 @@ RenderText::RenderText(std::string text, SDL_Renderer *sdl_renderer,
 RenderText::~RenderText() {
   if (textTexture) {
     SDL_DestroyTexture(textTexture);
+    textTexture = nullptr;
   }
+}
+
+void RenderText::SetText(std::string updatedText) {
+  text = updatedText;
+  if (textTexture) {
+    SDL_DestroyTexture(textTexture);
+    textTexture = nullptr;
+  }
+  CreateTexture(font, updatedText, textColor, sdl_renderer, xPos, yPos);
 }
 
 void RenderText::Render() {
