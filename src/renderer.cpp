@@ -57,6 +57,8 @@ Renderer::Renderer(const std::size_t screen_width,
 
   prompt = std::make_unique<RenderText>("Enter your name: ", sdl_renderer, font,
                                         SDL_Color{255, 255, 255, 255}, 10, 10);
+  userName = std::make_unique<RenderText>(
+      "", sdl_renderer, font, SDL_Color{255, 255, 255, 255}, 150, 10);
 }
 
 Renderer::~Renderer() {
@@ -67,14 +69,14 @@ Renderer::~Renderer() {
   SDL_Quit();
 }
 
-void Renderer::Render(GameState state, Snake const snake,
-                      SDL_Point const &food) {
+void Renderer::Render(GameState state, Snake const snake, SDL_Point const &food,
+                      const std::string &userName) {
   // Clear screen
   SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
   SDL_RenderClear(sdl_renderer);
 
   if (state == GameState::START_SCREEN) {
-    RenderStartScreen();
+    RenderStartScreen(userName);
   } else if (state == GameState::RUNNING) {
     RenderRunningScreen(food, snake);
   }
@@ -83,7 +85,11 @@ void Renderer::Render(GameState state, Snake const snake,
   SDL_RenderPresent(sdl_renderer);
 }
 
-void Renderer::RenderStartScreen() { prompt->Render(); }
+void Renderer::RenderStartScreen(const std::string &name) {
+  prompt->Render();
+  userName->SetText(name);
+  userName->Render();
+}
 
 void Renderer::RenderRunningScreen(const SDL_Point &food, const Snake &snake) {
   SDL_Rect block;

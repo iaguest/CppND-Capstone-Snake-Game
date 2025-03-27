@@ -17,11 +17,12 @@ public:
            const std::size_t grid_width, const std::size_t grid_height);
   ~Renderer();
 
-  void Render(GameState state, Snake const snake, SDL_Point const &food);
+  void Render(GameState state, Snake const snake, SDL_Point const &food,
+              const std::string &userName);
   void UpdateWindowTitle(GameState state, int score, int fps);
 
 private:
-  void RenderStartScreen();
+  void RenderStartScreen(const std::string &name);
   void RenderRunningScreen(const SDL_Point &food, const Snake &snake);
 
   const std::size_t screen_width;
@@ -33,6 +34,7 @@ private:
   SDL_Renderer *sdl_renderer{nullptr};
   TTF_Font *font{nullptr};
   std::unique_ptr<RenderText> prompt{nullptr};
+  std::unique_ptr<RenderText> userName{nullptr};
 };
 
 #endif

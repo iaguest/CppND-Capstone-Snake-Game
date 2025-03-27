@@ -2,6 +2,10 @@
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 
+namespace {
+constexpr const char *kEmptyDisplayText = " ";
+}
+
 RenderText::RenderText(std::string text, SDL_Renderer *sdl_renderer,
                        TTF_Font *font, SDL_Color textColor, int xPos, int yPos)
     : text(text), sdl_renderer(sdl_renderer), font(font), textColor(textColor),
@@ -12,8 +16,9 @@ RenderText::RenderText(std::string text, SDL_Renderer *sdl_renderer,
 void RenderText::CreateTexture(TTF_Font *font, std::string &text,
                                const SDL_Color &textColor,
                                SDL_Renderer *sdl_renderer, int xPos, int yPos) {
-  SDL_Surface *textSurface =
-      TTF_RenderText_Blended(font, text.c_str(), textColor);
+  // Make sure don't try to render completely empty string here
+  SDL_Surface *textSurface = TTF_RenderText_Blended(
+      font, text.size() != 0 ? text.c_str() : kEmptyDisplayText, textColor);
   if (!textSurface) {
     std::cerr << "TTF_RenderText_Blended: " << TTF_GetError() << std::endl;
     throw std::runtime_error("Error rendering text");
@@ -43,6 +48,11 @@ RenderText::~RenderText() {
 }
 
 void RenderText::SetText(std::string updatedText) {
+  if (text == updatedText) {
+    // Nothing to do
+    return;
+  }
+
   text = updatedText;
   if (textTexture) {
     SDL_DestroyTexture(textTexture);
