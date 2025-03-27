@@ -20,6 +20,7 @@ add_executable(SnakeGame
     src/controller.cpp
     src/renderer.cpp
     src/snake.cpp
+    src/rendertext.cpp 
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets/fonts DESTINATION ${CMAKE_BINARY_DIR})

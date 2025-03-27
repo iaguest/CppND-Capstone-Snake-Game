@@ -1,16 +1,21 @@
 #include "renderer.h"
+#include "rendertext.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
+namespace {
+constexpr char *kFont = "./fonts/Roboto-Regular.ttf";
+constexpr int kFontSize = 18;
+} // namespace
+
 Renderer::Renderer(const std::size_t screen_width,
                    const std::size_t screen_height,
-                   const std::size_t grid_width, const std::size_t grid_height,
-                   TTF_Font *font)
+                   const std::size_t grid_width, const std::size_t grid_height)
     : screen_width(screen_width), screen_height(screen_height),
-      grid_width(grid_width), grid_height(grid_height), font(font) {
+      grid_width(grid_width), grid_height(grid_height) {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "SDL could not initialize.\n";
@@ -36,9 +41,27 @@ Renderer::Renderer(const std::size_t screen_width,
     std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
     throw std::runtime_error("Renderer creation failed");
   }
+
+  // Initialise ttf
+  if (TTF_Init() == -1) {
+    std::cerr << "TTF_Init: " << TTF_GetError() << std::endl;
+    throw std::runtime_error("TTF initialisation failed");
+  }
+
+  // Open the font
+  font = TTF_OpenFont(kFont, kFontSize);
+  if (!font) {
+    std::cerr << "TTF_OpenFont: " << TTF_GetError() << std::endl;
+    throw std::runtime_error("Failed to open font");
+  }
+
+  prompt =
+      std::make_unique<RenderText>("Enter your name: ", sdl_renderer, font);
 }
 
 Renderer::~Renderer() {
+  TTF_CloseFont(font);
+  TTF_Quit();
   SDL_DestroyRenderer(sdl_renderer);
   SDL_DestroyWindow(sdl_window);
   SDL_Quit();
@@ -60,36 +83,7 @@ void Renderer::Render(GameState state, Snake const snake,
   SDL_RenderPresent(sdl_renderer);
 }
 
-void Renderer::RenderStartScreen() {
-  SDL_Color textColor = {255, 255, 255, 255};
-
-  SDL_Surface *textSurface =
-      TTF_RenderText_Blended(font, "Enter your name: ", textColor);
-  if (!textSurface) {
-    std::cerr << "TTF_RenderText_Blended: " << TTF_GetError() << std::endl;
-    throw std::runtime_error("Error rendering text");
-  }
-
-  SDL_Texture *textTexture =
-      SDL_CreateTextureFromSurface(sdl_renderer, textSurface);
-  if (!textTexture) {
-    std::cerr << "SDL_CreateTextureFromSurface: " << SDL_GetError()
-              << std::endl;
-    SDL_FreeSurface(textSurface);
-    throw std::runtime_error("Error rendering text");
-  }
-
-  int textWidth = textSurface->w;
-  int textHeight = textSurface->h;
-
-  SDL_FreeSurface(textSurface);
-
-  SDL_Rect renderQuad = {0, 0, textWidth, textHeight};
-
-  SDL_RenderCopy(sdl_renderer, textTexture, nullptr, &renderQuad);
-
-  SDL_DestroyTexture(textTexture);
-}
+void Renderer::RenderStartScreen() { prompt->Render(); }
 
 void Renderer::RenderRunningScreen(const SDL_Point &food, const Snake &snake) {
   SDL_Rect block;
