@@ -7,6 +7,7 @@
 #include "snake.h"
 #include <SDL2/SDL.h>
 #include <random>
+#include <string>
 
 class Game {
 public:
@@ -18,6 +19,7 @@ public:
 
 private:
   GameState state;
+  std::string userName;
   Snake snake;
   SDL_Point food;
 

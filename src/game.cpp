@@ -3,8 +3,9 @@
 #include <iostream>
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
-    : state(GameState::START_SCREEN), snake(grid_width, grid_height),
-      engine(dev()), random_w(0, static_cast<int>(grid_width - 1)),
+    : state(GameState::START_SCREEN), userName(""),
+      snake(grid_width, grid_height), engine(dev()),
+      random_w(0, static_cast<int>(grid_width - 1)),
       random_h(0, static_cast<int>(grid_height - 1)) {
   PlaceFood();
 }
@@ -21,9 +22,9 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     frame_start = SDL_GetTicks();
 
     // Input, Update, Render - the main game loop.
-    controller.HandleInput(state, snake);
+    controller.HandleInput(state, userName, snake);
     Update();
-    renderer.Render(state, snake, food, "Bob");
+    renderer.Render(state, snake, food, userName);
 
     frame_end = SDL_GetTicks();
 
@@ -64,11 +65,18 @@ void Game::PlaceFood() {
 }
 
 void Game::Update() {
+  const bool isTextInputActive = SDL_IsTextInputActive();
   if (!snake.alive) {
     // TODO: Set this to game over and pause before exiting
     state = GameState::EXITING;
     return;
+  } else if (state == GameState::START_SCREEN && !isTextInputActive) {
+    SDL_StartTextInput(); // Start typing
   } else if (state == GameState::RUNNING) {
+    if (isTextInputActive) {
+      SDL_StopTextInput(); // Done typing
+    }
+
     snake.Update();
 
     int new_x = static_cast<int>(snake.head_x);

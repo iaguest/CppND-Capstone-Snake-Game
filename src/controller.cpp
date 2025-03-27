@@ -11,13 +11,14 @@ void Controller::ChangeDirection(Snake &snake, Snake::Direction input,
   return;
 }
 
-void Controller::HandleInput(GameState &state, Snake &snake) const {
+void Controller::HandleInput(GameState &state, std::string &userName,
+                             Snake &snake) const {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {
       state = GameState::EXITING;
     } else if (state == GameState::START_SCREEN) {
-      HandleStartScreenInput(e, state);
+      HandleStartScreenInput(e, state, userName);
     } else if (state == GameState::RUNNING) {
       HandleRunningGameInput(e, snake);
     }
@@ -46,12 +47,16 @@ void Controller::HandleRunningGameInput(SDL_Event &e, Snake &snake) const {
   }
 }
 
-void Controller::HandleStartScreenInput(SDL_Event &e, GameState &state) const {
+void Controller::HandleStartScreenInput(SDL_Event &e, GameState &state,
+                                        std::string &userName) const {
+  if (e.type == SDL_TEXTINPUT) {
+    userName += e.text.text;
+  }
   if (e.type == SDL_KEYDOWN) {
-    switch (e.key.keysym.sym) {
-    case SDLK_UP:
+    if (e.key.keysym.sym == SDLK_BACKSPACE && !userName.empty()) {
+      userName.pop_back();
+    } else if (e.key.keysym.sym == SDLK_RETURN) {
       state = GameState::RUNNING;
-      break;
     }
   }
 }
