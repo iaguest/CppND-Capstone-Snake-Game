@@ -1,12 +1,23 @@
 #include "game.h"
 #include <SDL2/SDL.h>
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <utility>
+
+namespace {
+constexpr const char *kOrg = "IGApps";
+}
+
+std::string Game::Name = "Snake";
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : state(GameState::START_SCREEN), userName(""),
       snake(grid_width, grid_height), engine(dev()),
       random_w(0, static_cast<int>(grid_width - 1)),
       random_h(0, static_cast<int>(grid_height - 1)) {
+  high_score = ReadHighScore();
+
   PlaceFood();
 }
 
@@ -35,7 +46,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 
     // After every second, update the window title.
     if (frame_end - title_timestamp >= 1000) {
-      renderer.UpdateWindowTitle(state, score, frame_count);
+      renderer.UpdateWindowTitle(state, high_score, score, frame_count);
       frame_count = 0;
       title_timestamp = frame_end;
     }
@@ -68,6 +79,10 @@ void Game::Update() {
   const bool isTextInputActive = SDL_IsTextInputActive();
   if (!snake.alive) {
     // TODO: Set this to game over and pause before exiting
+    if (score > high_score.second) {
+      WriteHighScore(std::make_pair(userName, score));
+    }
+
     state = GameState::EXITING;
     return;
   } else if (state == GameState::START_SCREEN && !isTextInputActive) {
@@ -95,3 +110,42 @@ void Game::Update() {
 
 int Game::GetScore() const { return score; }
 int Game::GetSize() const { return snake.size; }
+
+std::string Game::GetHighScorePath() const {
+  char *path = SDL_GetPrefPath(kOrg, Game::Name.c_str());
+  std::string fullPath = std::string(path) + "highscore.txt";
+  SDL_free(path);
+  return fullPath;
+}
+
+std::pair<std::string, int> Game::ReadHighScore() const {
+  const std::string highScoresPath = GetHighScorePath();
+  std::ifstream inFile(highScoresPath);
+  std::string line;
+  if (std::getline(inFile, line)) {
+    std::stringstream ss(line);
+    std::string name;
+    std::string scoreStr;
+
+    if (std::getline(ss, name, ',') && std::getline(ss, scoreStr)) {
+      try {
+        return std::make_pair(name, std::stoi(scoreStr));
+      } catch (...) {
+        std::cerr << "Error parsing high score line: " << line << "\n";
+      }
+    }
+  }
+
+  return std::pair<std::string, int>();
+}
+
+void Game::WriteHighScore(const std::pair<std::string, int> &highScore) const {
+  const std::string highScoresPath = GetHighScorePath();
+  std::ofstream outFile(highScoresPath, std::ios::trunc); // overwrite file
+
+  if (outFile) {
+    outFile << highScore.first << "," << highScore.second;
+  } else {
+    std::cerr << "Failed to write high score to: " << highScoresPath << '\n';
+  }
+}

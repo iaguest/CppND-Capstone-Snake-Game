@@ -1,10 +1,13 @@
 #include "renderer.h"
+#include "game.h"
 #include "rendertext.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
+
 
 namespace {
 constexpr char *kFont = "./fonts/Roboto-Regular.ttf";
@@ -24,7 +27,7 @@ Renderer::Renderer(const std::size_t screen_width,
   }
 
   // Create Window
-  sdl_window = SDL_CreateWindow("Snake Game", SDL_WINDOWPOS_CENTERED,
+  sdl_window = SDL_CreateWindow(Game::Name.c_str(), SDL_WINDOWPOS_CENTERED,
                                 SDL_WINDOWPOS_CENTERED, screen_width,
                                 screen_height, SDL_WINDOW_SHOWN);
 
@@ -121,11 +124,19 @@ void Renderer::RenderRunningScreen(const SDL_Point &food, const Snake &snake) {
   SDL_RenderFillRect(sdl_renderer, &block);
 }
 
-void Renderer::UpdateWindowTitle(GameState state, int score, int fps) {
+void Renderer::UpdateWindowTitle(GameState state,
+                                 const std::pair<std::string, int> &highScore,
+                                 int score, int fps) {
   if (state != GameState::RUNNING)
     return;
 
-  std::string title{"Snake Score: " + std::to_string(score) +
-                    " FPS: " + std::to_string(fps)};
-  SDL_SetWindowTitle(sdl_window, title.c_str());
+  std::ostringstream title;
+  title << Game::Name.c_str() << "  |  FPS: " << fps
+        << "  |  Current Score: " << score;
+
+  if (!highScore.first.empty() && highScore.second > 0) {
+    title << "  |  High Score: " << highScore.first << " " << highScore.second;
+  }
+
+  SDL_SetWindowTitle(sdl_window, title.str().c_str());
 }

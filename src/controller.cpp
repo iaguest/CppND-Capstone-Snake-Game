@@ -55,7 +55,7 @@ void Controller::HandleStartScreenInput(SDL_Event &e, GameState &state,
   if (e.type == SDL_KEYDOWN) {
     if (e.key.keysym.sym == SDLK_BACKSPACE && !userName.empty()) {
       userName.pop_back();
-    } else if (e.key.keysym.sym == SDLK_RETURN) {
+    } else if (e.key.keysym.sym == SDLK_RETURN && !userName.empty()) {
       state = GameState::RUNNING;
     }
   }

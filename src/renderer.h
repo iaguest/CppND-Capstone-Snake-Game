@@ -6,6 +6,7 @@
 #include "snake.h"
 #include <SDL2/SDL.h>
 #include <memory>
+#include <utility>
 #include <vector>
 
 class RenderText;
@@ -19,7 +20,9 @@ public:
 
   void Render(GameState state, Snake const snake, SDL_Point const &food,
               const std::string &userName);
-  void UpdateWindowTitle(GameState state, int score, int fps);
+  void UpdateWindowTitle(GameState state,
+                         const std::pair<std::string, int> &highScore,
+                         int score, int fps);
 
 private:
   void RenderStartScreen(const std::string &name);

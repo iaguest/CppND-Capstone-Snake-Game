@@ -8,6 +8,7 @@
 #include <SDL2/SDL.h>
 #include <random>
 #include <string>
+#include <vector>
 
 class Game {
 public:
@@ -17,7 +18,16 @@ public:
   int GetScore() const;
   int GetSize() const;
 
+  static std::string Name;
+
 private:
+  std::string GetHighScorePath() const;
+  std::pair<std::string, int> ReadHighScore() const;
+  void WriteHighScore(const std::pair<std::string, int> &highScore) const;
+
+  void PlaceFood();
+  void Update();
+
   GameState state;
   std::string userName;
   Snake snake;
@@ -29,9 +39,7 @@ private:
   std::uniform_int_distribution<int> random_h;
 
   int score{0};
-
-  void PlaceFood();
-  void Update();
+  std::pair<std::string, int> high_score;
 };
 
 #endif
