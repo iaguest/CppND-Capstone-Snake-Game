@@ -9,7 +9,7 @@ namespace {
 constexpr const char *kOrg = "IGApps";
 }
 
-std::string Game::Name = "Snake";
+std::string Game::Name = "Snake Game";
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : state(GameState::START_SCREEN), userName(""),
@@ -58,6 +58,10 @@ void Game::Run(Controller const &controller, Renderer &renderer,
       SDL_Delay(target_frame_duration - frame_duration);
     }
   }
+
+  if (score > high_score.second) {
+    WriteHighScore(std::make_pair(userName, score));
+  }
 }
 
 void Game::PlaceFood() {
@@ -79,10 +83,6 @@ void Game::Update() {
   const bool isTextInputActive = SDL_IsTextInputActive();
   if (!snake.alive) {
     // TODO: Set this to game over and pause before exiting
-    if (score > high_score.second) {
-      WriteHighScore(std::make_pair(userName, score));
-    }
-
     state = GameState::EXITING;
     return;
   } else if (state == GameState::START_SCREEN && !isTextInputActive) {
