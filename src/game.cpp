@@ -29,7 +29,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   Uint32 frame_duration;
   int frame_count = 0;
 
-  while (state != GameState::EXITING) {
+  while (state != GameState::GAME_OVER) {
     frame_start = SDL_GetTicks();
 
     // Input, Update, Render - the main game loop.
@@ -62,6 +62,19 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   if (score > high_score.second) {
     WriteHighScore(std::make_pair(userName, score));
   }
+
+  OnExit();
+}
+
+void Game::OnExit() const {
+  SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+  if (!snake.alive) {
+    SDL_Event e;
+    while (SDL_WaitEvent(&e)) {
+      if (e.type == SDL_KEYDOWN)
+        break;
+    }
+  }
 }
 
 void Game::PlaceFood() {
@@ -82,8 +95,7 @@ void Game::PlaceFood() {
 void Game::Update() {
   const bool isTextInputActive = SDL_IsTextInputActive();
   if (!snake.alive) {
-    // TODO: Set this to game over and pause before exiting
-    state = GameState::EXITING;
+    state = GameState::GAME_OVER;
     return;
   } else if (state == GameState::START_SCREEN && !isTextInputActive) {
     SDL_StartTextInput(); // Start typing

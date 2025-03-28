@@ -80,7 +80,7 @@ void Renderer::Render(GameState state, Snake const snake, SDL_Point const &food,
 
   if (state == GameState::START_SCREEN) {
     RenderStartScreen(userName);
-  } else if (state == GameState::RUNNING) {
+  } else {
     RenderRunningScreen(food, snake);
   }
 

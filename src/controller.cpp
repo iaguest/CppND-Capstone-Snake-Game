@@ -16,7 +16,7 @@ void Controller::HandleInput(GameState &state, std::string &userName,
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {
-      state = GameState::EXITING;
+      state = GameState::GAME_OVER;
     } else if (state == GameState::START_SCREEN) {
       HandleStartScreenInput(e, state, userName);
     } else if (state == GameState::RUNNING) {

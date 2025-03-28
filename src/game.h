@@ -17,6 +17,7 @@ public:
            std::size_t target_frame_duration);
   int GetScore() const;
   int GetSize() const;
+  void OnExit() const;
 
   static std::string Name;
 
