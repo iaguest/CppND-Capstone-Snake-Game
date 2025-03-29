@@ -7,7 +7,8 @@
 
 namespace {
 constexpr const char *kOrg = "IGApps";
-}
+constexpr const int kObstacleCount = 3;
+} // namespace
 
 std::string Game::Name = "Snake Game";
 
@@ -19,6 +20,7 @@ Game::Game(std::size_t grid_width, std::size_t grid_height)
   high_score = ReadHighScore();
 
   PlaceFood();
+  PlaceObstacles(grid_width, grid_height);
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -35,7 +37,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(state, userName, snake);
     Update();
-    renderer.Render(state, snake, food, userName);
+    renderer.Render(state, snake, food, obstacles, userName);
 
     frame_end = SDL_GetTicks();
 
@@ -89,6 +91,19 @@ void Game::PlaceFood() {
       food.y = y;
       return;
     }
+  }
+}
+
+void Game::PlaceObstacles(std::size_t grid_width, std::size_t grid_height) {
+  const int separation = grid_height / kObstacleCount;
+  const int obstacleWidth = grid_width / 3;
+  for (int i = 0; i < kObstacleCount; ++i) {
+    SDL_Rect obstacle;
+    obstacle.x = (grid_width - obstacleWidth) / 2;
+    obstacle.y = (i * separation) + (separation / 2);
+    obstacle.h = 1;
+    obstacle.w = obstacleWidth;
+    obstacles.emplace_back(obstacle);
   }
 }
 

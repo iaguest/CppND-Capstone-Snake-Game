@@ -19,14 +19,14 @@ public:
   ~Renderer();
 
   void Render(GameState state, Snake const snake, SDL_Point const &food,
-              const std::string &userName);
+              std::vector<SDL_Rect> const &obstacles, std::string const &userName);
   void UpdateWindowTitle(GameState state,
                          const std::pair<std::string, int> &highScore,
                          int score, int fps);
 
 private:
   void RenderStartScreen(const std::string &name);
-  void RenderRunningScreen(const SDL_Point &food, const Snake &snake);
+  void RenderRunningScreen(const SDL_Point &food, std::vector<SDL_Rect> const &obstacles, const Snake &snake);
 
   const std::size_t screen_width;
   const std::size_t screen_height;

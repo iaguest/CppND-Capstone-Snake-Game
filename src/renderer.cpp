@@ -8,7 +8,6 @@
 #include <stdexcept>
 #include <string>
 
-
 namespace {
 constexpr char *kFont = "./fonts/Roboto-Regular.ttf";
 constexpr int kFontSize = 18;
@@ -73,7 +72,8 @@ Renderer::~Renderer() {
 }
 
 void Renderer::Render(GameState state, Snake const snake, SDL_Point const &food,
-                      const std::string &userName) {
+                      std::vector<SDL_Rect> const &obstacles,
+                      std::string const &userName) {
   // Clear screen
   SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
   SDL_RenderClear(sdl_renderer);
@@ -81,7 +81,7 @@ void Renderer::Render(GameState state, Snake const snake, SDL_Point const &food,
   if (state == GameState::START_SCREEN) {
     RenderStartScreen(userName);
   } else {
-    RenderRunningScreen(food, snake);
+    RenderRunningScreen(food, obstacles, snake);
   }
 
   // Update Screen
@@ -94,7 +94,9 @@ void Renderer::RenderStartScreen(const std::string &name) {
   userName->Render();
 }
 
-void Renderer::RenderRunningScreen(const SDL_Point &food, const Snake &snake) {
+void Renderer::RenderRunningScreen(const SDL_Point &food,
+                                   std::vector<SDL_Rect> const &obstacles,
+                                   const Snake &snake) {
   SDL_Rect block;
   block.w = screen_width / grid_width;
   block.h = screen_height / grid_height;
@@ -104,6 +106,18 @@ void Renderer::RenderRunningScreen(const SDL_Point &food, const Snake &snake) {
   block.x = food.x * block.w;
   block.y = food.y * block.h;
   SDL_RenderFillRect(sdl_renderer, &block);
+
+  // Render obstacles
+  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
+  for (SDL_Rect const &obstacle : obstacles) {
+    SDL_Rect rect;
+    rect.x = obstacle.x * block.w;
+    rect.y = obstacle.y * block.h;
+    rect.h = obstacle.h * block.h;
+    rect.w = obstacle.w * block.w;
+
+    SDL_RenderFillRect(sdl_renderer, &rect);
+  }
 
   // Render snake's body
   SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);

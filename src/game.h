@@ -27,12 +27,14 @@ private:
   void WriteHighScore(const std::pair<std::string, int> &highScore) const;
 
   void PlaceFood();
+  void PlaceObstacles(std::size_t grid_width, std::size_t grid_height);
   void Update();
 
   GameState state;
   std::string userName;
   Snake snake;
   SDL_Point food;
+  std::vector<SDL_Rect> obstacles;
 
   std::random_device dev;
   std::mt19937 engine;
