@@ -99,7 +99,7 @@ void Game::PlaceFood() {
     x = random_w(engine);
     y = random_h(engine);
     // Check that the location is not occupied before placing food.
-    if (!snake.SnakeCell(x, y) && !IsObstacleCell(x, y)) {
+    if (!snake.SnakeCell(x, y) && !IsObstacleRow(y)) {
       food.x = x;
       food.y = y;
       return;
@@ -133,6 +133,17 @@ bool Game::IsObstacleCell(int x, int y) {
   std::lock_guard<std::mutex> lock(obstacleMutex);
   for (const auto &obstacle : obstacles) {
     if (SDL_PointInRect(&p, &obstacle.rect)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool Game::IsObstacleRow(int y) {
+  std::lock_guard<std::mutex> lock(obstacleMutex);
+  for (const auto &obstacle : obstacles) {
+    if (y == obstacle.rect.y) {
       return true;
     }
   }

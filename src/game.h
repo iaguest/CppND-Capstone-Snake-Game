@@ -35,6 +35,7 @@ private:
   void PlaceFood();
   void InitialiseObstacles(std::size_t grid_width, std::size_t grid_height);
   bool IsObstacleCell(int x, int y);
+  bool IsObstacleRow(int y);
   void Update();
   void UpdateObstacles(int grid_width);
 
