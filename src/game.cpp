@@ -15,14 +15,20 @@ constexpr const int kObstacleCount = 3;
 std::string Game::Name = "Snake Game";
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
-    : userName(""), snake(grid_width, grid_height), engine(dev()),
-      random_w(0, static_cast<int>(grid_width - 1)),
+    : grid_width(grid_width), userName(""), snake(grid_width, grid_height),
+      engine(dev()), random_w(0, static_cast<int>(grid_width - 1)),
       random_h(0, static_cast<int>(grid_height - 1)) {
   state.store(GameState::START_SCREEN);
   high_score = ReadHighScore();
 
-  PlaceObstacles(grid_width, grid_height);
+  InitialiseObstacles(grid_width, grid_height);
   PlaceFood();
+}
+
+Game::~Game() {
+  if (obstacleThread.joinable()) {
+    obstacleThread.join();
+  }
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -39,7 +45,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
     // Input, Update, Render - the main game loop.
     controller.HandleInput(std::ref(state), userName, snake);
     Update();
-    renderer.Render(std::ref(state), snake, food, obstacles, userName);
+    Render(renderer);
 
     frame_end = SDL_GetTicks();
 
@@ -71,6 +77,11 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   OnExit();
 }
 
+void Game::Render(Renderer &renderer) {
+  std::lock_guard<std::mutex> lock(obstacleMutex);
+  renderer.Render(std::ref(state), snake, food, obstacles, userName);
+}
+
 void Game::OnExit() const {
   SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
   if (!snake.alive) {
@@ -96,23 +107,32 @@ void Game::PlaceFood() {
   }
 }
 
-void Game::PlaceObstacles(std::size_t grid_width, std::size_t grid_height) {
+void Game::InitialiseObstacles(std::size_t grid_width,
+                               std::size_t grid_height) {
   const int separation = grid_height / kObstacleCount;
   const int obstacleWidth = grid_width / 3;
+
+  std::lock_guard<std::mutex> lock(obstacleMutex);
   for (int i = 0; i < kObstacleCount; ++i) {
-    SDL_Rect obstacle;
-    obstacle.x = (grid_width - obstacleWidth) / 2;
-    obstacle.y = (i * separation) + (separation / 2);
-    obstacle.h = 1;
-    obstacle.w = obstacleWidth;
-    obstacles.emplace_back(obstacle);
+    SDL_Rect rect;
+    rect.x = (grid_width - obstacleWidth) / 2;
+    rect.y = (i * separation) + (separation / 2);
+    rect.h = 1;
+    rect.w = obstacleWidth;
+
+    MovingObstacle::Direction dir = (i % 2 == 0)
+                                        ? MovingObstacle::Direction::LEFT
+                                        : MovingObstacle::Direction::RIGHT;
+
+    obstacles.push_back({rect, dir});
   }
 }
 
 bool Game::IsObstacleCell(int x, int y) {
   SDL_Point p{x, y};
-  for (const SDL_Rect &obstacle : obstacles) {
-    if (SDL_PointInRect(&p, &obstacle)) {
+  std::lock_guard<std::mutex> lock(obstacleMutex);
+  for (const auto &obstacle : obstacles) {
+    if (SDL_PointInRect(&p, &obstacle.rect)) {
       return true;
     }
   }
@@ -130,6 +150,10 @@ void Game::Update() {
   } else if (state.load() == GameState::RUNNING) {
     if (isTextInputActive) {
       SDL_StopTextInput(); // Done typing
+    }
+    if (!obstacleThread.joinable()) {
+      // Fire up obstacle movement thread
+      obstacleThread = std::thread(&Game::UpdateObstacles, this, grid_width);
     }
 
     snake.Update();
@@ -155,6 +179,34 @@ void Game::Update() {
       snake.alive = false;
       return;
     }
+  }
+}
+
+void Game::UpdateObstacles(int grid_width) {
+  const int speed = 1;
+  const int speedMs = 50;
+
+  while (state.load() == GameState::RUNNING) {
+    {
+      std::lock_guard<std::mutex> lock(obstacleMutex);
+      for (MovingObstacle &obstacle : obstacles) {
+        if (obstacle.dir == MovingObstacle::Direction::LEFT) {
+          obstacle.rect.x -= speed;
+          if (obstacle.rect.x <= 0) {
+            obstacle.rect.x = 0;
+            obstacle.dir = MovingObstacle::Direction::RIGHT;
+          }
+        } else {
+          obstacle.rect.x += speed;
+          if (obstacle.rect.x + obstacle.rect.w >= grid_width) {
+            obstacle.rect.x = grid_width - obstacle.rect.w;
+            obstacle.dir = MovingObstacle::Direction::LEFT;
+          }
+        }
+      }
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(speedMs));
   }
 }
 

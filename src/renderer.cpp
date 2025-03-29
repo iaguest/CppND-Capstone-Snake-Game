@@ -71,8 +71,9 @@ Renderer::~Renderer() {
   SDL_Quit();
 }
 
-void Renderer::Render(std::atomic<GameState> &state, Snake const snake, SDL_Point const &food,
-                      std::vector<SDL_Rect> const &obstacles,
+void Renderer::Render(std::atomic<GameState> &state, Snake const snake,
+                      SDL_Point const &food,
+                      std::vector<MovingObstacle> const &obstacles,
                       std::string const &userName) {
   // Clear screen
   SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
@@ -95,7 +96,7 @@ void Renderer::RenderStartScreen(const std::string &name) {
 }
 
 void Renderer::RenderRunningScreen(const SDL_Point &food,
-                                   std::vector<SDL_Rect> const &obstacles,
+                                   std::vector<MovingObstacle> const &obstacles,
                                    const Snake &snake) {
   SDL_Rect block;
   block.w = screen_width / grid_width;
@@ -109,12 +110,12 @@ void Renderer::RenderRunningScreen(const SDL_Point &food,
 
   // Render obstacles
   SDL_SetRenderDrawColor(sdl_renderer, 0x00, 0xFF, 0x00, 0xFF);
-  for (SDL_Rect const &obstacle : obstacles) {
+  for (auto const &obstacle : obstacles) {
     SDL_Rect rect;
-    rect.x = obstacle.x * block.w;
-    rect.y = obstacle.y * block.h;
-    rect.h = obstacle.h * block.h;
-    rect.w = obstacle.w * block.w;
+    rect.x = obstacle.rect.x * block.w;
+    rect.y = obstacle.rect.y * block.h;
+    rect.h = obstacle.rect.h * block.h;
+    rect.w = obstacle.rect.w * block.w;
 
     SDL_RenderFillRect(sdl_renderer, &rect);
   }
@@ -138,7 +139,7 @@ void Renderer::RenderRunningScreen(const SDL_Point &food,
   SDL_RenderFillRect(sdl_renderer, &block);
 }
 
-void Renderer::UpdateWindowTitle(std::atomic<GameState>& state,
+void Renderer::UpdateWindowTitle(std::atomic<GameState> &state,
                                  const std::pair<std::string, int> &highScore,
                                  int score, int fps) {
   if (state.load() != GameState::RUNNING)

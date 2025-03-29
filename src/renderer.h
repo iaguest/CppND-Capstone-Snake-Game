@@ -2,6 +2,7 @@
 #define RENDERER_H
 
 #include "gamestate.h"
+#include "movingobstacle.h"
 #include "rendertext.h"
 #include "snake.h"
 #include <SDL2/SDL.h>
@@ -20,14 +21,14 @@ public:
   ~Renderer();
 
   void Render(std::atomic<GameState> &state, Snake const snake, SDL_Point const &food,
-              std::vector<SDL_Rect> const &obstacles, std::string const &userName);
+              std::vector<MovingObstacle> const &obstacles, std::string const &userName);
   void UpdateWindowTitle(std::atomic<GameState> &state,
                          const std::pair<std::string, int> &highScore,
                          int score, int fps);
 
 private:
   void RenderStartScreen(const std::string &name);
-  void RenderRunningScreen(const SDL_Point &food, std::vector<SDL_Rect> const &obstacles, const Snake &snake);
+  void RenderRunningScreen(const SDL_Point &food, std::vector<MovingObstacle> const &obstacles, const Snake &snake);
 
   const std::size_t screen_width;
   const std::size_t screen_height;
