@@ -108,7 +108,7 @@ void Renderer::RenderRunningScreen(const SDL_Point &food,
   SDL_RenderFillRect(sdl_renderer, &block);
 
   // Render obstacles
-  SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0x00, 0x00, 0xFF);
+  SDL_SetRenderDrawColor(sdl_renderer, 0x00, 0xFF, 0x00, 0xFF);
   for (SDL_Rect const &obstacle : obstacles) {
     SDL_Rect rect;
     rect.x = obstacle.x * block.w;

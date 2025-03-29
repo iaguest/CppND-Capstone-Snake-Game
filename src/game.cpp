@@ -1,5 +1,6 @@
 #include "game.h"
 #include <SDL2/SDL.h>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -141,6 +142,16 @@ void Game::Update() {
       // Grow snake and increase speed.
       snake.GrowBody();
       snake.speed += 0.02;
+    }
+
+    // Check if snake has collided with an obstacle
+    if (IsObstacleCell(snake.head_x, snake.head_y) ||
+        std::any_of(snake.body.begin(), snake.body.end(),
+                    [this](const SDL_Point &p) {
+                      return this->IsObstacleCell(p.x, p.y);
+                    })) {
+      snake.alive = false;
+      return;
     }
   }
 }
