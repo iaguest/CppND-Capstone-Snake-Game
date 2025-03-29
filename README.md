@@ -24,6 +24,33 @@ For the capstone project, I have extended the original Snake game, following the
 
 <img src="snake_game_2.gif"/>
 
+## Rubric Requirements Met
+
+1. The project demonstrates an understanding of C++ functions and control structures.
+  - Game::UpdateObstacles (game.cpp line 196)
+3. The project reads data from a file and process the data, or the program writes data to a file.
+  - Game::ReadHighScore (game.cpp line 234), Game::WriteHighScore (game.cpp line 255)
+4. The project accepts user input and processes the input.
+  - Controller::HandleStartScreenInput (controller.cpp line 52)
+5. One or more classes are added to the project with appropriate access specifiers for class members.
+  - See rendertext.h
+6. Class constructors utilize member initialization lists.
+  - e.g. rendertext.h but used where possible throughout
+7. Overloaded functions allow the same function to operate on different parameters.
+  - RenderText::SetText (rendertext.cpp line 55 onwards has 2 overloads)
+8. The project makes use of references in function declarations.
+  - Used extensively e.g. Game::WriteHighScore (game.cpp line 255), Renderer::Render (renderer.cpp line 77)
+9. The project uses destructors appropriately.
+  - Game::~Game() (game.cpp line 28), RenderText::~RenderText() (rendertext.cpp line 48)
+10. The project uses scope / Resource Acquisition Is Initialization (RAII) where appropriate.
+  - Render text uses RAII to manage text textures so text can be rendered easily and repeatedly
+11. The project uses smart pointers instead of raw pointers.
+  - Unique ptrs hold multiple render text fields in renderer.h line 41
+12. The project uses multithreading.
+  - Obstacle movement thread created in Game::Update() (game.cpp line 167)
+13. A mutex or lock is used in the project.
+  - See obstacleMutex in game.h line 48, used e.g. in Game::UpdateObstacles (game.cpp line 202)
+
 ## Dependencies for Running Locally
 
 - cmake >= 3.7
