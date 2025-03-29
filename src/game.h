@@ -28,6 +28,7 @@ private:
 
   void PlaceFood();
   void PlaceObstacles(std::size_t grid_width, std::size_t grid_height);
+  bool IsObstacleCell(int x, int y);
   void Update();
 
   GameState state;

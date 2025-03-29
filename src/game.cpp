@@ -19,8 +19,8 @@ Game::Game(std::size_t grid_width, std::size_t grid_height)
       random_h(0, static_cast<int>(grid_height - 1)) {
   high_score = ReadHighScore();
 
-  PlaceFood();
   PlaceObstacles(grid_width, grid_height);
+  PlaceFood();
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -84,9 +84,8 @@ void Game::PlaceFood() {
   while (true) {
     x = random_w(engine);
     y = random_h(engine);
-    // Check that the location is not occupied by a snake item before placing
-    // food.
-    if (!snake.SnakeCell(x, y)) {
+    // Check that the location is not occupied before placing food.
+    if (!snake.SnakeCell(x, y) && !IsObstacleCell(x, y)) {
       food.x = x;
       food.y = y;
       return;
@@ -105,6 +104,17 @@ void Game::PlaceObstacles(std::size_t grid_width, std::size_t grid_height) {
     obstacle.w = obstacleWidth;
     obstacles.emplace_back(obstacle);
   }
+}
+
+bool Game::IsObstacleCell(int x, int y) {
+  SDL_Point p{x, y};
+  for (const SDL_Rect &obstacle : obstacles) {
+    if (SDL_PointInRect(&p, &obstacle)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void Game::Update() {

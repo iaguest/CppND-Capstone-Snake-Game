@@ -9,17 +9,15 @@ public:
   enum class Direction { kUp, kDown, kLeft, kRight };
 
   Snake(int grid_width, int grid_height)
-      : grid_width(grid_width),
-        grid_height(grid_height),
-        head_x(grid_width / 2),
-        head_y(grid_height / 2) {}
+      : grid_width(grid_width), grid_height(grid_height), head_x(0), head_y(0) {
+  }
 
   void Update();
 
   void GrowBody();
   bool SnakeCell(int x, int y);
 
-  Direction direction = Direction::kUp;
+  Direction direction = Direction::kRight;
 
   float speed{0.1f};
   int size{1};
