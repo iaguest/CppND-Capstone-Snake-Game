@@ -4,7 +4,12 @@
 
 namespace {
 constexpr const char *kEmptyDisplayText = " ";
+
+bool AreColorsEqual(const SDL_Color &a, const SDL_Color &b) {
+  return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
 }
+
+} // namespace
 
 RenderText::RenderText(std::string text, SDL_Renderer *sdl_renderer,
                        TTF_Font *font, SDL_Color textColor, int xPos, int yPos)
@@ -48,16 +53,22 @@ RenderText::~RenderText() {
 }
 
 void RenderText::SetText(std::string updatedText) {
-  if (text == updatedText) {
+  SetText(updatedText, textColor);
+}
+
+void RenderText::SetText(std::string updatedText, SDL_Color updatedTextColor) {
+  if (text == updatedText && AreColorsEqual(textColor, updatedTextColor)) {
     // Nothing to do
     return;
   }
 
   text = updatedText;
+  textColor = updatedTextColor;
   if (textTexture) {
     SDL_DestroyTexture(textTexture);
     textTexture = nullptr;
   }
+
   CreateTexture(font, updatedText, textColor, sdl_renderer, xPos, yPos);
 }
 

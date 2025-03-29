@@ -13,6 +13,7 @@ public:
   ~RenderText();
 
   void SetText(std::string updatedText);
+  void SetText(std::string updatedText, SDL_Color updatedTextColor);
 
   void Render();
 

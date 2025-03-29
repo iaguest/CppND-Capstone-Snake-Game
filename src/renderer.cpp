@@ -57,10 +57,13 @@ Renderer::Renderer(const std::size_t screen_width,
     throw std::runtime_error("Failed to open font");
   }
 
+  title = std::make_unique<RenderText>("Welcome to SNAKE!", sdl_renderer, font,
+                                       SDL_Color{0, 255, 0, 255}, 10, 10);
+
   prompt = std::make_unique<RenderText>("Enter your name: ", sdl_renderer, font,
-                                        SDL_Color{255, 255, 255, 255}, 10, 10);
-  userName = std::make_unique<RenderText>(
-      "", sdl_renderer, font, SDL_Color{255, 255, 255, 255}, 150, 10);
+                                        SDL_Color{0, 255, 255, 255}, 10, 40);
+  userName = std::make_unique<RenderText>("", sdl_renderer, font,
+                                          SDL_Color{0, 255, 255, 255}, 150, 40);
 }
 
 Renderer::~Renderer() {
@@ -90,6 +93,7 @@ void Renderer::Render(std::atomic<GameState> &state, Snake const snake,
 }
 
 void Renderer::RenderStartScreen(const std::string &name) {
+  title->Render();
   prompt->Render();
   userName->SetText(name);
   userName->Render();

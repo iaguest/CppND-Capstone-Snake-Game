@@ -38,6 +38,7 @@ private:
   SDL_Window *sdl_window{nullptr};
   SDL_Renderer *sdl_renderer{nullptr};
   TTF_Font *font{nullptr};
+  std::unique_ptr<RenderText> title{nullptr};
   std::unique_ptr<RenderText> prompt{nullptr};
   std::unique_ptr<RenderText> userName{nullptr};
 };
