@@ -195,7 +195,7 @@ void Game::Update() {
 
 void Game::UpdateObstacles(int grid_width) {
   const int speed = 1;
-  const int speedMs = 50;
+  const int sleepMs = 50;
 
   while (state.load() == GameState::RUNNING) {
     {
@@ -217,7 +217,7 @@ void Game::UpdateObstacles(int grid_width) {
       }
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(speedMs));
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
   }
 }
 
