@@ -5,6 +5,7 @@
 #include "rendertext.h"
 #include "snake.h"
 #include <SDL2/SDL.h>
+#include <atomic>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -18,9 +19,9 @@ public:
            const std::size_t grid_width, const std::size_t grid_height);
   ~Renderer();
 
-  void Render(GameState state, Snake const snake, SDL_Point const &food,
+  void Render(std::atomic<GameState> &state, Snake const snake, SDL_Point const &food,
               std::vector<SDL_Rect> const &obstacles, std::string const &userName);
-  void UpdateWindowTitle(GameState state,
+  void UpdateWindowTitle(std::atomic<GameState> &state,
                          const std::pair<std::string, int> &highScore,
                          int score, int fps);
 

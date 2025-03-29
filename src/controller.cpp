@@ -2,6 +2,8 @@
 #include "gamestate.h"
 #include "snake.h"
 #include <SDL2/SDL.h>
+#include <atomic>
+#include <functional>
 #include <iostream>
 
 void Controller::ChangeDirection(Snake &snake, Snake::Direction input,
@@ -11,15 +13,15 @@ void Controller::ChangeDirection(Snake &snake, Snake::Direction input,
   return;
 }
 
-void Controller::HandleInput(GameState &state, std::string &userName,
-                             Snake &snake) const {
+void Controller::HandleInput(std::atomic<GameState> &state,
+                             std::string &userName, Snake &snake) const {
   SDL_Event e;
   while (SDL_PollEvent(&e)) {
     if (e.type == SDL_QUIT) {
-      state = GameState::GAME_OVER;
-    } else if (state == GameState::START_SCREEN) {
-      HandleStartScreenInput(e, state, userName);
-    } else if (state == GameState::RUNNING) {
+      state.store(GameState::GAME_OVER);
+    } else if (state.load() == GameState::START_SCREEN) {
+      HandleStartScreenInput(e, std::ref(state), userName);
+    } else if (state.load() == GameState::RUNNING) {
       HandleRunningGameInput(e, snake);
     }
   }
@@ -47,7 +49,8 @@ void Controller::HandleRunningGameInput(SDL_Event &e, Snake &snake) const {
   }
 }
 
-void Controller::HandleStartScreenInput(SDL_Event &e, GameState &state,
+void Controller::HandleStartScreenInput(SDL_Event &e,
+                                        std::atomic<GameState> &state,
                                         std::string &userName) const {
   if (e.type == SDL_TEXTINPUT) {
     userName += e.text.text;
@@ -56,7 +59,7 @@ void Controller::HandleStartScreenInput(SDL_Event &e, GameState &state,
     if (e.key.keysym.sym == SDLK_BACKSPACE && !userName.empty()) {
       userName.pop_back();
     } else if (e.key.keysym.sym == SDLK_RETURN && !userName.empty()) {
-      state = GameState::RUNNING;
+      state.store(GameState::RUNNING);
     }
   }
 }

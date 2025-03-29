@@ -6,6 +6,7 @@
 #include "renderer.h"
 #include "snake.h"
 #include <SDL2/SDL.h>
+#include <atomic>
 #include <random>
 #include <string>
 #include <vector>
@@ -31,7 +32,7 @@ private:
   bool IsObstacleCell(int x, int y);
   void Update();
 
-  GameState state;
+  std::atomic<GameState> state;
   std::string userName;
   Snake snake;
   SDL_Point food;

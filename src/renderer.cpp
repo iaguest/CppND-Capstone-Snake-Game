@@ -71,14 +71,14 @@ Renderer::~Renderer() {
   SDL_Quit();
 }
 
-void Renderer::Render(GameState state, Snake const snake, SDL_Point const &food,
+void Renderer::Render(std::atomic<GameState> &state, Snake const snake, SDL_Point const &food,
                       std::vector<SDL_Rect> const &obstacles,
                       std::string const &userName) {
   // Clear screen
   SDL_SetRenderDrawColor(sdl_renderer, 0x1E, 0x1E, 0x1E, 0xFF);
   SDL_RenderClear(sdl_renderer);
 
-  if (state == GameState::START_SCREEN) {
+  if (state.load() == GameState::START_SCREEN) {
     RenderStartScreen(userName);
   } else {
     RenderRunningScreen(food, obstacles, snake);
@@ -138,10 +138,10 @@ void Renderer::RenderRunningScreen(const SDL_Point &food,
   SDL_RenderFillRect(sdl_renderer, &block);
 }
 
-void Renderer::UpdateWindowTitle(GameState state,
+void Renderer::UpdateWindowTitle(std::atomic<GameState>& state,
                                  const std::pair<std::string, int> &highScore,
                                  int score, int fps) {
-  if (state != GameState::RUNNING)
+  if (state.load() != GameState::RUNNING)
     return;
 
   std::ostringstream title;

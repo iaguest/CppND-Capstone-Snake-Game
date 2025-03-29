@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <algorithm>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <sstream>
 #include <utility>
@@ -14,10 +15,10 @@ constexpr const int kObstacleCount = 3;
 std::string Game::Name = "Snake Game";
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
-    : state(GameState::START_SCREEN), userName(""),
-      snake(grid_width, grid_height), engine(dev()),
+    : userName(""), snake(grid_width, grid_height), engine(dev()),
       random_w(0, static_cast<int>(grid_width - 1)),
       random_h(0, static_cast<int>(grid_height - 1)) {
+  state.store(GameState::START_SCREEN);
   high_score = ReadHighScore();
 
   PlaceObstacles(grid_width, grid_height);
@@ -32,13 +33,13 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   Uint32 frame_duration;
   int frame_count = 0;
 
-  while (state != GameState::GAME_OVER) {
+  while (state.load() != GameState::GAME_OVER) {
     frame_start = SDL_GetTicks();
 
     // Input, Update, Render - the main game loop.
-    controller.HandleInput(state, userName, snake);
+    controller.HandleInput(std::ref(state), userName, snake);
     Update();
-    renderer.Render(state, snake, food, obstacles, userName);
+    renderer.Render(std::ref(state), snake, food, obstacles, userName);
 
     frame_end = SDL_GetTicks();
 
@@ -49,7 +50,8 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 
     // After every second, update the window title.
     if (frame_end - title_timestamp >= 1000) {
-      renderer.UpdateWindowTitle(state, high_score, score, frame_count);
+      renderer.UpdateWindowTitle(std::ref(state), high_score, score,
+                                 frame_count);
       frame_count = 0;
       title_timestamp = frame_end;
     }
@@ -121,11 +123,11 @@ bool Game::IsObstacleCell(int x, int y) {
 void Game::Update() {
   const bool isTextInputActive = SDL_IsTextInputActive();
   if (!snake.alive) {
-    state = GameState::GAME_OVER;
+    state.store(GameState::GAME_OVER);
     return;
-  } else if (state == GameState::START_SCREEN && !isTextInputActive) {
+  } else if (state.load() == GameState::START_SCREEN && !isTextInputActive) {
     SDL_StartTextInput(); // Start typing
-  } else if (state == GameState::RUNNING) {
+  } else if (state.load() == GameState::RUNNING) {
     if (isTextInputActive) {
       SDL_StopTextInput(); // Done typing
     }
